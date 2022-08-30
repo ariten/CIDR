@@ -23,11 +23,11 @@ class CIDR:
                 if count >= max_row:
                     if i[self.IP_LOC1] != '0':
                         watchlist_ref = self.sub_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], i[4], i[5])
-                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{self.watchlist_ref_counter}', last_row=True)
+                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{watchlist_ref}', last_row=True)
                 else:
                     if i[self.IP_LOC1] != '0':
                         watchlist_ref = self.sub_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], i[4], i[5])
-                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{self.watchlist_ref_counter}')
+                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{watchlist_ref}')
 
                 count += 1
                 cur_per = round((count/max_row)*100, 0)
