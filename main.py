@@ -64,7 +64,7 @@ class CIDR:
 
     def sub_list(self, ip1, ip2, country_code, country, region, city, last_row=False):
         self.count += (len(ip1) + len(ip2) + len(country_code) + len(country) + len(region) + len(city))
-        if self.count >= 50000000:
+        if self.count >= 450000000:
             self.watchlist_ref_counter += 1
             with open(f'{self.split_file}{self.watchlist_ref_counter}.csv', 'a+', newline='') as f:
                 writer = csv.writer(f)
