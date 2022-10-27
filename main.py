@@ -1,6 +1,5 @@
 import csv
 import ipaddress
-import datetime
 import os.path
 
 
@@ -23,11 +22,11 @@ class CIDR:
                 if count >= max_row:
                     if i[self.IP_LOC1] != '0':
                         watchlist_ref = self.sub_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], i[4], i[5])
-                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{watchlist_ref}', last_row=True)
+                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], watchlist_ref, last_row=True)
                 else:
                     if i[self.IP_LOC1] != '0':
                         watchlist_ref = self.sub_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], i[4], i[5])
-                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], f'{self.split_file}{watchlist_ref}')
+                        self.main_list(i[self.IP_LOC1], i[self.IP_LOC2], i[2], i[3], watchlist_ref)
 
                 count += 1
                 cur_per = round((count/max_row)*100, 0)
@@ -64,13 +63,15 @@ class CIDR:
 
     def sub_list(self, ip1, ip2, country_code, country, region, city, last_row=False):
         self.count += (len(ip1) + len(ip2) + len(country_code) + len(country) + len(region) + len(city))
-        if self.count >= 450000000:
+        self.row_count += 1
+        if self.count >= self.max_file_size or self.row_count >= self.row_limit:
+            self.row_count = 0
             self.watchlist_ref_counter += 1
             with open(f'{self.split_file}{self.watchlist_ref_counter}.csv', 'a+', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerows(self.sub_list_buffer)
             f.close()
-            self.sub_list_buffer = []
+            self.sub_list_buffer = [['CIDRAddress', 'CountryCode', 'Country', 'Region', 'City']]
             ip = self.process_ip(ip1, ip2)
             self.sub_list_buffer.append([ip, country_code, country, region, city])
             self.count = (len(ip1) + len(ip2) + len(country_code) + len(country) + len(region) + len(city))
@@ -89,7 +90,7 @@ class CIDR:
                     writer = csv.writer(f)
                     writer.writerows(self.sub_list_buffer)
                 f.close()
-                self.sub_list_buffer = []
+                self.sub_list_buffer = [['CIDRAddress', 'CountryCode', 'Country', 'Region', 'City']]
         return self.watchlist_ref_counter
 
     def create_main_row(self, start_ip, last_ip, country_code, country, watchlist_ref):
@@ -115,8 +116,8 @@ class CIDR:
         return data[0]
 
     def __init__(self):
-        self.main_list_buffer = []
-        self.sub_list_buffer = []
+        self.main_list_buffer = [['CIDRIPAddress', 'CountryCode', 'Country', 'Watchlist_ID']]
+        self.sub_list_buffer = [['CIDRAddress', 'CountryCode', 'Country', 'Region', 'City']]
         self.SKIP_HEADER = False
         self.buffer_size = 5000
         self.IP_LOC1 = 0
@@ -124,6 +125,9 @@ class CIDR:
         self.last_ip = 0
         self.count = 0
         self.watchlist_ref_counter = 1
+        self.max_file_size = 400000000  # Bytes
+        self.row_limit = 4700000  # File row limit
+        self.row_count = 0
         self.start_ip = 0
         self.buffer = []
         self.outfile = 'OverseasMain.csv'
