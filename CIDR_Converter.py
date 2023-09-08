@@ -1,5 +1,6 @@
 import csv
 import ipaddress
+import sys
 
 
 class CIDR:
@@ -11,14 +12,10 @@ class CIDR:
                 if self.SKIP_HEADER:
                     next(reader, )
                 for i in reader:
-                    ip = self.process_ip(i[self.IP_LOC1], i[self.IP_LOC2])
-                    if self.IP_LOC1 == 0 and self.IP_LOC2 == 1:
-                        row = [ip] + i[2:]
-                    elif self.IP_LOC1 == 0:
-                        row = [ip] + i[1:self.IP_LOC2] + i[self.IP_LOC2+1:]
-                    else:
-                        row = i[:self.IP_LOC1] + i[self.IP_LOC2:]
-                    writer.writerow(row)
+                    ip_ranges = self.process_ip(i[0], i[1])
+                    for ip_range in ip_ranges:
+                        row = [str(ip_range)] + i[2:]
+                        writer.writerow(row)
             f.close()
         o.close()
         print('COMPLETE')
@@ -27,14 +24,12 @@ class CIDR:
         ip1 = ipaddress.ip_address(int(ip1))
         ip2 = ipaddress.ip_address(int(ip2))
         data = [ipaddr for ipaddr in ipaddress.summarize_address_range(ip1, ip2)]
-        return data[0]
+        return data
 
     def __init__(self):
         self.SKIP_HEADER = False
-        self.IP_LOC1 = 0
-        self.IP_LOC2 = 1
-        self.outfile = 'processed.csv'
-        self.open_file('IP-COUNTRY-REGION-CITY.CSV')
+        self.outfile = sys.argv[2]
+        self.open_file(sys.argv[1])
 
 
 if __name__ == '__main__':
